@@ -1,0 +1,304 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Hungry Fridge Gamepad API demo</title>
+	<meta name="description" content="Hungry Fridge Gamepad API demo" />
+	<style> body { margin: 0; padding: 0; background: #9576AA; } </style>
+	<script src="js/phaser-arcade-physics.2.4.3.min.js"></script>
+	<script src="js/gamepad.js"></script>
+</head>
+<body>
+<script>
+var game = new Phaser.Game(960, 640, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update });
+
+var player, turret, bullets, cursors, dpad, key = {}, g = {};
+var nextFire = 0, fireRate = 200, currentSpeed = 0, gamepadStatus = false;
+
+function preload() {
+    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
+    game.scale.pageAlignHorizontally = true;
+    game.scale.pageAlignVertically = true;
+    game.stage.backgroundColor = '#9576AA';
+	game.load.image('bg', 'img/screen-background.png');
+	game.load.image('fridge', 'img/fridge.png');
+	game.load.image('turret', 'img/fridge-turret.png');
+	game.load.image('bullet', 'img/bullet.png');
+	game.load.image('gamepad-bg', 'img/gamepad-bg.png');
+	game.load.spritesheet('gamepad-status', 'img/gamepad-status.png', 311, 84);
+	game.load.spritesheet('button-LT', 'img/button-LT.png', 41, 29);
+	game.load.spritesheet('button-RT', 'img/button-RT.png', 41, 29);
+	game.load.spritesheet('button-LB', 'img/button-LB.png', 92, 48);
+	game.load.spritesheet('button-RB', 'img/button-RB.png', 92, 48);
+	game.load.spritesheet('dpad', 'img/dpad.png', 113, 121);
+	game.load.spritesheet('axis', 'img/axis.png', 68, 75);
+	game.load.spritesheet('buttonA', 'img/buttonA.png', 43, 49);
+	game.load.spritesheet('buttonB', 'img/buttonB.png', 42, 49);
+	game.load.spritesheet('buttonX', 'img/buttonX.png', 43, 49);
+	game.load.spritesheet('buttonY', 'img/buttonY.png', 42, 50);
+	game.load.spritesheet('button-back', 'img/button-back.png', 31, 38);
+	game.load.spritesheet('button-power', 'img/button-power.png', 43, 29);
+	game.load.spritesheet('button-start', 'img/button-start.png', 31, 37);
+}
+function create() {
+	game.add.sprite(0, 0, 'bg');
+	createPlayer();
+	gamepadStatus = game.add.sprite(10, 10, 'gamepad-status', 0);
+	createGamepad();
+}
+function update() {
+	if(gamepadAPI.turbo) {
+		gamepadStatus.frame = 1;
+	}
+	keyboardControls();
+	gamepadControls();
+	game.physics.arcade.velocityFromRotation(player.rotation, currentSpeed, player.body.velocity);
+	turret.x = player.x;
+	turret.y = player.y;
+}
+function player_turnLeft() {
+	player.angle -= 3;
+	turret.angle -= 3;
+}
+function player_turnRight() {
+	player.angle += 3;
+	turret.angle += 3;
+}
+function turret_turnLeft() {
+	turret.angle -= 3;
+}
+function turret_turnRight() {
+	turret.angle += 3;
+}
+function player_moveForward() {
+	if(currentSpeed < 300) {
+		currentSpeed += 30;
+	}
+}
+function player_moveBack() {
+	if(currentSpeed > -100) {
+		currentSpeed -= 10;
+	}
+}
+function turret_fire() {
+	if(game.time.now > nextFire && bullets.countDead() > 0) {
+		nextFire = game.time.now + fireRate;
+		var bullet = bullets.getFirstExists(false);
+		bullet.reset(turret.x, turret.y);
+		bullet.rotation = turret.rotation;
+		game.physics.arcade.velocityFromAngle(bullet.angle, 1000, bullet.body.velocity);
+		player.bringToTop();
+		turret.bringToTop();
+	}
+}
+function createPlayer() {
+	player = game.add.sprite(game.world.width*0.5, game.world.height*0.4, 'fridge');
+	game.physics.enable(player, Phaser.Physics.ARCADE);
+	player.body.immovable = true;
+	player.body.collideWorldBounds = true;
+	player.body.drag.set(0.2);
+	player.body.maxVelocity.setTo(400, 400);
+	player.body.setSize(60, 60, 0, 0);
+	player.anchor.setTo(0.5, 0.5);
+	player.angle = 90;
+
+	turret = game.add.sprite(player.x, player.y, 'turret');
+	turret.anchor.setTo(0.25, 0.5);
+	turret.angle = player.angle;
+
+	bullets = game.add.group();
+	bullets.enableBody = true;
+	bullets.physicsBodyType = Phaser.Physics.ARCADE;
+	bullets.createMultiple(30, 'bullet', 0, false);
+	bullets.setAll('anchor.x', 0.5);
+	bullets.setAll('anchor.y', 0.5);
+	bullets.setAll('outOfBoundsKill', true);
+	bullets.setAll('checkWorldBounds', true);
+
+	// create cursor keys for the player
+	cursors = game.input.keyboard.createCursorKeys();
+	key.turretLeft = game.input.keyboard.addKey(Phaser.Keyboard.A);
+	key.turretRight = game.input.keyboard.addKey(Phaser.Keyboard.D);
+	key.turretFire = game.input.keyboard.addKey(Phaser.Keyboard.W);
+}
+function createGamepad() {
+	gamepadDevice = game.add.sprite(game.world.width-380, 40, 'gamepad-bg');
+	gamepadDevice.anchor.set(0,0);
+	gamepadDevice.scale.set(0.75);
+	g.buttonLT = game.add.sprite(65, -25, 'button-LT', 0);
+	g.buttonRT = game.add.sprite(390, -28, 'button-RT', 0);
+	g.buttonLB = game.add.sprite(35, -15, 'button-LB', 0);
+	g.buttonRB = game.add.sprite(370, -18, 'button-RB', 0);
+	g.dpad = game.add.sprite(100, 110, 'dpad', 0);
+	g.axis1 = game.add.sprite(65, 35, 'axis', 0);
+	g.axis2 = game.add.sprite(280, 140, 'axis', 0);
+	g.buttonBack = game.add.sprite(190, 25, 'button-back', 0);
+	g.buttonPower = game.add.sprite(227, 30, 'button-power', 0);
+	g.buttonStart = game.add.sprite(276, 25, 'button-start', 0);
+	g.buttonA = game.add.sprite(365, 95, 'buttonA', 0);
+	g.buttonB = game.add.sprite(405, 55, 'buttonB', 0);
+	g.buttonX = game.add.sprite(325, 55, 'buttonX', 0);
+	g.buttonY = game.add.sprite(365, 15, 'buttonY', 0);
+	gamepadDevice.addChild(g.buttonLT);
+	gamepadDevice.addChild(g.buttonRT);
+	gamepadDevice.addChild(g.buttonLB);
+	gamepadDevice.addChild(g.buttonRB);
+	gamepadDevice.addChild(g.dpad);
+	gamepadDevice.addChild(g.axis1);
+	gamepadDevice.addChild(g.axis2);
+	gamepadDevice.addChild(g.buttonBack);
+	gamepadDevice.addChild(g.buttonPower);
+	gamepadDevice.addChild(g.buttonStart);
+	gamepadDevice.addChild(g.buttonA);
+	gamepadDevice.addChild(g.buttonB);
+	gamepadDevice.addChild(g.buttonX);
+	gamepadDevice.addChild(g.buttonY);
+}
+function gamepadControls() {
+	gamepadAPI.update();
+	if(gamepadAPI.buttonPressed('DPad-Up','hold')) {
+		player_moveForward();
+		g.dpad.frame = 1;
+	}
+	else if(gamepadAPI.buttonPressed('DPad-Down','hold')) {
+		player_moveBack();
+		g.dpad.frame = 3;
+	}
+	else {
+		g.dpad.frame = 0;
+		if(currentSpeed > 0) {
+			currentSpeed -= 4;
+		}
+		else if(currentSpeed < 0) {
+			currentSpeed += 4;
+		}
+	}
+	if(gamepadAPI.buttonPressed('DPad-Left','hold')) {
+		player_turnLeft();
+		g.dpad.frame = 4;
+	}
+	if(gamepadAPI.buttonPressed('DPad-Right','hold')) {
+		player_turnRight();
+		g.dpad.frame = 2;
+	}
+	if(gamepadAPI.buttonPressed('A','hold')) {
+		turret_fire();
+		g.buttonA.frame = 1;
+	}
+	else {
+		g.buttonA.frame = 0;
+	}
+	if(gamepadAPI.buttonPressed('LB','hold')) {
+		turret_turnLeft();
+		g.buttonLB.frame = 1;
+	}
+	else {
+		g.buttonLB.frame = 0;
+	}
+	if(gamepadAPI.buttonPressed('RB','hold')) {
+		turret_turnRight();
+		g.buttonRB.frame = 1;
+	}
+	else {
+		g.buttonRB.frame = 0;
+	}
+	if(gamepadAPI.buttonPressed('B','hold')) { g.buttonB.frame = 1; } else { g.buttonB.frame = 0; }
+	if(gamepadAPI.buttonPressed('X','hold')) { g.buttonX.frame = 1; } else { g.buttonX.frame = 0; }
+	if(gamepadAPI.buttonPressed('Y','hold')) { g.buttonY.frame = 1; } else { g.buttonY.frame = 0; }
+	if(gamepadAPI.buttonPressed('Back','hold')) { g.buttonBack.frame = 1; } else { g.buttonBack.frame = 0; }
+	if(gamepadAPI.buttonPressed('Power','hold')) { g.buttonPower.frame = 1; } else { g.buttonPower.frame = 0; }
+	if(gamepadAPI.buttonPressed('Start','hold')) { g.buttonStart.frame = 1; } else { g.buttonStart.frame = 0; }
+	if(gamepadAPI.buttonPressed('Axis-Left','hold')) {
+		g.axis1.frame = 5;
+	}
+	else if(gamepadAPI && gamepadAPI.axesStatus && gamepadAPI.axesStatus[0]) {
+		if(gamepadAPI.axesStatus[0] > 0.5) {
+			g.axis1.frame = 2;
+		}
+		else if(gamepadAPI.axesStatus[0] < -0.5) {
+			g.axis1.frame = 4;
+		}
+		else if(gamepadAPI.axesStatus[1] > 0.5) {
+			g.axis1.frame = 3;
+		}
+		else if(gamepadAPI.axesStatus[1] < -0.5) {
+			g.axis1.frame = 1;
+		}
+		else {
+			g.axis1.frame = 0;
+		}
+	}
+	if(gamepadAPI && gamepadAPI.axesStatus && gamepadAPI.axesStatus[2]) {
+		if(gamepadAPI.axesStatus[2] > 0.5) {
+			g.buttonLT.frame = 1;
+		}
+		else {
+			g.buttonLT.frame = 0;
+		}
+	}
+	if(gamepadAPI.buttonPressed('Axis-Right','hold')) {
+		g.axis2.frame = 5;
+	}
+	else if(gamepadAPI && gamepadAPI.axesStatus && gamepadAPI.axesStatus[3]) {
+		if(gamepadAPI.axesStatus[3] > 0.5) {
+			g.axis2.frame = 2;
+		}
+		else if(gamepadAPI.axesStatus[3] < -0.5) {
+			g.axis2.frame = 4;
+		}
+		else if(gamepadAPI.axesStatus[4] > 0.5) {
+			g.axis2.frame = 3;
+		}
+		else if(gamepadAPI.axesStatus[4] < -0.5) {
+			g.axis2.frame = 1;
+		}
+		else {
+			g.axis2.frame = 0;
+		}
+	}
+	if(gamepadAPI && gamepadAPI.axesStatus && gamepadAPI.axesStatus[5]) {
+		if(gamepadAPI.axesStatus[5] > 0.5) {
+			g.buttonRT.frame = 1;
+		}
+		else {
+			g.buttonRT.frame = 0;
+		}
+	}
+}
+function keyboardControls() {
+	if(cursors.left.isDown) {
+		player_turnLeft();
+	}
+	else if(cursors.right.isDown) {
+		player_turnRight();
+	}
+	if(cursors.up.isDown) {
+		player_moveForward();
+	}
+	else if(cursors.down.isDown) {
+		player_moveBack();
+	}
+	else {
+		if(currentSpeed > 0) {
+			currentSpeed -= 4;
+		}
+		else if(currentSpeed < 0) {
+			currentSpeed += 4;
+		}
+	}
+	if(key.turretLeft.isDown) {
+		turret_turnLeft();
+	}
+	else if(key.turretRight.isDown) {
+		turret_turnRight();
+	}
+	if(key.turretFire.isDown) {
+		turret_fire();
+	}
+	if(game.input.activePointer.isDown) {
+		turret_fire();
+	}
+}
+</script>
+</body>
+</html>
