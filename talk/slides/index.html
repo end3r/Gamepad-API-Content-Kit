@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Take Control of the Game with the Gamepad API</title>
+        <link rel="icon" href="favicon.ico">
+		<meta name="description" content="Take Control of the Game with the Gamepad API">
+		<meta name="author" content="Andrzej Mazur">
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/end3r.css" id="theme">
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+		<script>
+			if( window.location.search.match( /print-pdf/gi ) ) {
+				var link = document.createElement( 'link' );
+				link.rel = 'stylesheet';
+				link.type = 'text/css';
+				link.href = 'css/print/pdf.css';
+				document.getElementsByTagName( 'head' )[0].appendChild( link );
+			}
+		</script>
+		<!--[if lt IE 9]><script src="lib/js/html5shiv.js"></script><![endif]-->
+	</head>
+	<body>
+		<div class="reveal">
+			<div class="slides">
+				<section>
+					<h1>Take Control</h1>
+					<h1>of the Game</h1>
+					<h1>with the Gamepad API</h1>
+					<p>
+						<small>{Your name, event, location, date}</small>
+					</p>
+				</section>
+
+				<section>
+					<section class="bg" data-background="img/gamepad-device.png" data-background-size="535px" data-background-repeat="no-repeat">
+					</section>
+					<section>
+						<h2>Status</h2>
+						<p>W3C Working Draft</p>
+						<p><a href="http://www.w3.org/TR/gamepad/">www.w3.org/TR/gamepad/</a></p>
+						<p>Core editors:</p>
+						<ul>
+							<li>Ted Mielczarek (Mozilla)</li>
+							<li>Scott Graham (Google)</li>
+						</ul>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Gamepad API demo</h2>
+						<img src="img/super-turbo.png" alt="Gamepad API demo" style="height: 350px;" />
+						<p><a href="http://end3r.github.io/Gamepad-API-Content-Kit/demo/demo.html">end3r.github.io/Gamepad-API-Content-Kit/demo/demo.html</a></p>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Browser Support</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/browser-support.png" alt="Gamepad API browser support" />
+					</section>
+					<section>
+						<h2>Chrome</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/browsericon-chrome.png" alt="Gamepad API browser support - Chrome" />
+						<p>Version 21+ (prefixes), 35+ (default) [45]</p>
+					</section>
+					<section>
+						<h2>Firefox</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/browsericon-firefox.png" alt="Gamepad API browser support - Firefox" />
+						<p>Version 24+ (prefixes), 29+ (default) [40]</p>
+					</section>
+					<section>
+						<h2>Opera</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/browsericon-opera.png" alt="Gamepad API browser support - Opera" />
+						<p>Version 15+ (prefixes), 22+ (default) [31]</p>
+					</section>
+					<section>
+						<h2>Safari</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/browsericon-safari.png" alt="Gamepad API browser support - Safari" />
+						<p>No support</p>
+					</section>
+					<section>
+						<h2>Internet Explorer</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/browsericon-ie.png" alt="Gamepad API browser support - IE" />
+						<p>No support</p>
+					</section>
+					<section>
+						<h2>Edge</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/browsericon-edge.png" alt="Gamepad API browser support - Edge" />
+						<p>Version 12+</p>
+					</section>
+					<section>
+						<h2>Can I Use?</h2>
+						<img style="border: 0; background: none; box-shadow: none;" src="img/caniuse-gamepad.png" alt="Gamepad API - Can I Use" />
+						<a href="http://caniuse.com/#feat=gamepad">caniuse.com/gamepad</a>
+					</section>
+				</section>
+
+				<section>
+					<h2>Supported Devices</h2>
+					<img src="img/devices.jpg" alt="Gamepad devices" style="height: 450px;" />
+					<p>Most popular: XBox 360/One, PS3/PS4 on Windows/Mac.</p>
+				</section>
+
+				<section>
+					<section>
+						<h2>Gamepad API Implementation</h2>
+						<p>Privacy: interact first while the page is visible to get the event.</p>
+					</section>
+					<section>
+						<h2>Connecting the Gamepad</h2>
+						<p>
+							<pre><code>window.addEventListener("gamepadconnected", function(e) {
+	console.log("Gamepad connected: "+e.gamepad.id);
+});</code></pre>
+						</p>
+					</section>
+					<section>
+						<h2>Detecting disconnection</h2>
+						<p>
+							<pre><code>window.addEventListener("gamepaddisconnected", function(e) {
+	console.log("Gamepad disconnected: "+e.gamepad.id);
+});</code></pre>
+						</p>
+					</section>
+					<section>
+						<h2>The Gamepad Object</h2>
+						<ul>
+							<li class="fragment"><code>id</code> - information about the controller</li>
+							<li class="fragment"><code>index</code> - unique integer of the connected device</li>
+							<li class="fragment"><code>connected</code> - true if connected</li>
+							<li class="fragment"><code>mapping</code> - layout of the buttons, "standard"</li>
+							<li class="fragment"><code>axes</code> - array of floating point values, state of each axis</li>
+							<li class="fragment"><code>buttons</code> - array of <code>GamepadButton</code> objects, state of each button, <code>pressed</code> and <code>value</code> properties</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Detecting button presses</h2>
+
+<pre><code>function addgamepad(gamepad) {
+&nbsp;&nbsp;controllers[gamepad.index] = gamepad;
+&nbsp;&nbsp;window.requestAnimationFrame(updateStatus);
+}</code></pre>
+<pre><code>function updateStatus() {
+&nbsp;&nbsp;for(c in controllers) {
+&nbsp;&nbsp;&nbsp;&nbsp;var controller = controllers[c];
+&nbsp;&nbsp;&nbsp;&nbsp;for(var i=0; i&lt;controller.buttons.length; i++) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;var buttonPressed = controller.buttons[i].pressed;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if(buttonPressed) {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log("Button id="+i+" was pressed");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;} else {
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;console.log("Button id="+i+" was released");
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;&nbsp;&nbsp;}
+&nbsp;&nbsp;}
+}</code></pre>
+					</section>
+					<section>
+						<h2>Axis threshold</h2>
+						<p>Buttons: integer, 0 or 1.</p>
+						<p>Axes: float, -1 to 1.</p>
+						<img src="img/axis-threshold.png" alt="Axis threshold" />
+						<pre><code>Config.threshold = 0.5;</code></pre>
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Case Study: Hungry Fridge</h2>
+						<img src="img/hungryfridge-mainmenu.png" alt="Hungry Fridge - main menu" style="height: 540px;" />
+					</section>
+					<section>
+						<h2>The idea</h2>
+						<p>GitHub Game Off II theme: Change</p>
+						<ul>
+							<li>Good food vs bad food</li>
+							<li>Mobile vs desktop</li>
+						</ul>
+					</section>
+					<section>
+						<h2>Good food vs bad food</h2>
+						<img src="img/hungryfridge-howtoplay-mobile.png" alt="Hungry Fridge - how to play on mobile" style="height: 540px;" />
+					</section>
+					<section>
+						<h2>Mobile</h2>
+						<img src="img/hungryfridge-gameplay-mobile.png" alt="Hungry Fridge - gameplay on mobile" style="height: 540px;" />
+					</section>
+					<section>
+						<h2>Desktop</h2>
+						<img src="img/hungryfridge-gameplay-gamepad.png" alt="Hungry Fridge - gameplay on desktop" style="height: 540px;" />
+					</section>
+				</section>
+
+				<section>
+					<h2>Let's play!</h2>
+					<p><a href="http://fridge.enclavegames.com/">fridge.enclavegames.com</a></p>
+				</section>
+
+				<section>
+					<section>
+						<h2>Web API</h2>
+						<img src="img/dead-trigger-2.jpg" alt="Dead Trigger 2" />
+						<p>Full Screen, Pointer Lock, Gamepad</p>
+					</section>
+					<section class="bg" data-background="img/screenshot-unreal1.jpg" data-background-size="1024px" data-background-repeat="no-repeat">
+					</section>
+				</section>
+
+				<section>
+					<section>
+						<h2>Using the Gamepad API</h2>
+						<h3>to control the slides</h3>
+						<h3>about the Gamepad API</h3>
+						<img class="fragment" src="img/go-deeper.jpg" alt="We need to go deeper" style="height: 350px;" />
+					</section>
+					<section>
+						<h2>Firefox OS TV</h2>
+						<img src="img/panasonic.jpg" alt="Panasonic Firefox OS TV" />
+					</section>
+					<section>
+						<h2>WebVR and the future of the Web</h2>
+						<img src="img/oculus-touch.jpg" alt="WebVR Oculus Touch" />
+					</section>
+				</section>
+
+				<section>
+					<h2>Resources</h2>
+					<img src="img/resources.png" alt="Gamepad API resources" style="height: 450px;" />
+					<a href="">end3r.github.io/Gamepad-API-Content-Kit/#resources</a>
+				</section>
+
+				<section class="bg" data-background="img/gamedev-insights.jpg" data-background-size="1024px" data-background-repeat="no-repeat">
+				</section>
+
+				<section>
+					<h2>Summary</h2>
+					<img src="img/gamepad-ok.png" alt="Gamepad API is OK!" style="height: 450px;" />
+					<p>Supported, easy to implement, no plugins.</p>
+					<p>Rich console-like experience in the browser!</p>
+					</ul>
+				</section>
+
+				<section>
+					<h1>Thanks! Questions?</h1>
+					<p>&nbsp;</p>
+					<p>&nbsp;</p>
+					<p><a href="">slides online URL</a></p>
+					<p>&nbsp;</p>
+					<p>&nbsp;</p>
+					<h4>{Your name, social links}</h4>
+				</section>
+			</div>
+		</div>
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+		<script>
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+				theme: Reveal.getQueryHash().theme,
+				transition: Reveal.getQueryHash().transition || 'linear',
+				backgroundTransition: 'slide',
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+					{ src: 'plugin/gamepad/gamepad.js', async: true }
+				]
+			});
+		</script>
+	</body>
+</html>

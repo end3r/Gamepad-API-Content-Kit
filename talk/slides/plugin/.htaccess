@@ -1,0 +1,9 @@
+
+RewriteEngine on
+RewriteRule ^([a-zA-Z_0-9]+)/([a-zA-Z_0-9]+)/([a-zA-Z_0-9-]+)/$ index.php?d=$1&s=$2&p=$3 [L]
+RewriteRule ^([a-zA-Z_0-9]+)/([a-zA-Z_0-9]+)/$ index.php?d=$1&s=$2 [L]
+RewriteRule ^([a-zA-Z_0-9]+)/$ index.php?d=$1	[L]
+
+# BEGIN WordPress
+
+# END WordPress
